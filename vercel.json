@@ -2,15 +2,16 @@
     "version": 2,
     "builds": [
       {
-        "src": "package.json",
-        "use": "@vercel/static-build",
-        "config": {
-          "distDir": "web-build"
-        }
+        "src": "app/(tabs)/index.tsx",
+        "use": "@vercel/node"
       }
     ],
     "routes": [
-      { "src": "/(.*)", "dest": "/index.html" }
-    ]
+      {
+        "src": "/(.*)",
+        "dest": "/dist/$1"
+      }
+    ],
+    "outputDirectory": "dist"
   }
   

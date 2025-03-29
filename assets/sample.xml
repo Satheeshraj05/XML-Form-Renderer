@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+  <field type="text" id="customerName" label="Customer Name" />
+  <field type="text" id="forename" label="Forename" />
+  <field type="date" id="date" label="Date" />
+  <field type="radio" id="stage" label="Stage">
+    <option value="1">Stage - 1</option>
+    <option value="2">Stage - 2</option>
+    <option value="3">Stage - 3</option>
+  </field>
+  <field type="drawing" id="signature" label="Signature" />
+</form>

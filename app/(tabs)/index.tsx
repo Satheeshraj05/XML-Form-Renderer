@@ -1,74 +1,132 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, TouchableOpacity, Text, View, Platform, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
+import * as DocumentPicker from 'expo-document-picker';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const sampleXML = `<?xml version="1.0" encoding="UTF-8"?>
+<form>
+  <field type="text" id="customerName" label="Customer Name" />
+  <field type="text" id="forename" label="Forename" />
+  <field type="date" id="date" label="Date" />
+  <field type="radio" id="stage" label="Stage">
+    <option value="1">Stage - 1</option>
+    <option value="2">Stage - 2</option>
+    <option value="3">Stage - 3</option>
+  </field>
+  <field type="drawing" id="signature" label="Signature" />
+</form>`;
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const [isWeb] = useState(Platform.OS === 'web');
+  const handleRenderFromFile = async () => {
+    try {
+      if (isWeb) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.xml';
+  
+        input.onchange = (e: Event) => {
+          const target = e.target as HTMLInputElement;
+          if (!target.files || target.files.length === 0) return;
+  
+          const file = target.files[0];
+          const reader = new FileReader();
+  
+          reader.onload = (event) => {
+            const result = event.target?.result;
+            if (typeof result !== 'string') {
+              console.error('Invalid file content:', result);
+              alert('Error reading XML file.');
+              return;
+            }
+  
+            router.push({
+              pathname: '/form',
+              params: {
+                xmlContent: encodeURIComponent(result),
+                source: 'file',
+                fileName: file.name,
+              },
+            });
+          };
+  
+          reader.readAsText(file);
+        };
+  
+        input.click();
+      }
+    } catch (error) {
+      console.error('Error picking or reading file:', error);
+      alert('Error reading XML file.');
+    }
+  };
+  
+
+  const handleUseSampleXML = () => {
+    router.push({
+      pathname: '/form',
+      params: {
+        xmlContent: encodeURIComponent(sampleXML),
+        source: 'sample',
+        fileName: 'sample.xml',
+      },
+    });
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <Text style={styles.title}>XML Form Renderer</Text>
+      <Text style={styles.description}>
+        This app renders forms based on XML input. Choose one of the options below:
+      </Text>
+      
+      <TouchableOpacity 
+        style={styles.button}
+        onPress={handleRenderFromFile}
+      >
+        <Text style={styles.buttonText}>Render Form from XML File</Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity 
+        style={styles.button}
+        onPress={handleUseSampleXML}
+      >
+        <Text style={styles.buttonText}>Use Sample XML</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  description: {
+    fontSize: 16,
+    marginBottom: 32,
+    textAlign: 'center',
+    color: '#555',
+  },
+  button: {
+    backgroundColor: '#2196F3',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
